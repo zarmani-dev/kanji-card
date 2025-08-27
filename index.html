@@ -82,7 +82,7 @@
             <hr class="border-t border-gray-700">
 
             <!-- Kunyomi & Onyomi Inputs -->
-            <div class="space-y-4 grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="input-group">
                     <label for="kunyomi" class="block text-gray-300 font-semibold mb-1">Kunyomi</label>
                     <input type="text" id="kunyomi" placeholder="Enter kunyomi" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
@@ -94,23 +94,24 @@
             </div>
 
             <hr class="border-t border-gray-700">
-
+            
+            <div class="flex justify-between items-center mb-4">
+                <label class="block text-gray-300 font-semibold">Kanji Entries (separated by ';')</label>
+                <button id="add-row-btn" class="bg-blue-600 text-white font-semibold py-1 px-4 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
+                    Add Row
+                </button>
+            </div>
             <!-- Dynamic Rows Section -->
             <div id="dynamic-rows" class="space-y-4">
                 <!-- Initial Row -->
-                <div class="dynamic-row grid grid-cols-2 gap-4 input-group">
-                    <input type="text" placeholder="Kanji" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                    <input type="text" placeholder="Hiragana" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                    <input type="text" placeholder="English" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                    <input type="text" placeholder="Myanmar" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                <div class="dynamic-row flex items-center space-x-2 input-group">
+                    <input type="text" placeholder="Kanji ; Hiragana ; English ; Myanmar" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                    <button class="remove-row-btn bg-red-600 text-white p-2 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
                 </div>
-            </div>
-
-            <!-- Add Row Button -->
-            <div class="flex justify-center">
-                <button id="add-row-btn" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
-                    Add Row
-                </button>
             </div>
 
             <!-- Generate Button -->
@@ -200,16 +201,23 @@
         });
 
         // Function to create and append a new row of input fields
-        function createRow() {
+        function createRow(value = '') {
             const newRow = document.createElement('div');
-            newRow.className = 'dynamic-row grid grid-cols-2 gap-4 input-group';
+            newRow.className = 'dynamic-row flex items-center space-x-2 input-group';
             newRow.innerHTML = `
-                <input type="text" placeholder="Kanji" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                <input type="text" placeholder="Hiragana" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                <input type="text" placeholder="English" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                <input type="text" placeholder="Myanmar" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                <input type="text" placeholder="Kanji ; Hiragana ; English ; Myanmar" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200" value="${value}">
+                <button class="remove-row-btn bg-red-600 text-white p-2 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                    </svg>
+                </button>
             `;
             dynamicRowsContainer.appendChild(newRow);
+
+            // Add event listener to the new remove button
+            newRow.querySelector('.remove-row-btn').addEventListener('click', (event) => {
+                event.currentTarget.parentNode.remove();
+            });
         }
 
         // Function to handle the AI generation
@@ -288,15 +296,8 @@
                         
                         // Populate with new data
                         firstEntry.entries.forEach(entry => {
-                            const newRow = document.createElement('div');
-                            newRow.className = 'dynamic-row grid grid-cols-2 gap-4 input-group';
-                            newRow.innerHTML = `
-                                <input type="text" placeholder="Kanji" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200" value="${entry.kanji || ''}">
-                                <input type="text" placeholder="Hiragana" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200" value="${entry.hiragana || ''}">
-                                <input type="text" placeholder="English" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200" value="${entry.english || ''}">
-                                <input type="text" placeholder="Myanmar" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200" value="${entry.myanmar || ''}">
-                            `;
-                            dynamicRowsContainer.appendChild(newRow);
+                            const formattedString = `${entry.kanji || ''} ; ${entry.hiragana || ''} ; ${entry.english || ''} ; ${entry.myanmar || ''}`;
+                            createRow(formattedString);
                         });
                         
                         showMessage('Data generated successfully!', 'success');
@@ -338,14 +339,16 @@
 
             // Collect data from rows that are not empty
             dynamicRows.forEach(row => {
-                const inputs = row.querySelectorAll('input[type="text"]');
-                const text3 = inputs[0].value;
-                const text4 = inputs[1].value;
-                const text5 = inputs[2].value;
-                const text6 = inputs[3].value;
+                const input = row.querySelector('input[type="text"]');
+                const parts = input.value.split(';').map(part => part.trim());
 
-                if (text3 || text4 || text5 || text6) {
-                    filledRows.push(`${text3} -> ${text4} -> ${text5} (${text6})`);
+                if (parts.some(p => p !== '')) {
+                    const kanji = parts[0] || '';
+                    const hiragana = parts[1] || '';
+                    const english = parts[2] || '';
+                    const myanmar = parts[3] || '';
+                    
+                    filledRows.push(`${kanji} -> ${hiragana} -> ${english} (${myanmar})`);
                 }
             });
 
