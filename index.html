@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanji Data Entry</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Dark background */
+        }
+        .container {
+            transition: all 0.3s ease-in-out;
+            background-color: #1f2937; /* Darker container background */
+            color: #d1d5db; /* Light text color */
+        }
+        .input-group {
+            transition: all 0.3s ease-in-out;
+        }
+        input, textarea {
+            background-color: #374151; /* Even darker input background */
+            border-color: #4b5563; /* Darker border */
+            color: #f9fafb; /* Lighter text in inputs */
+        }
+        input:focus, textarea:focus {
+            ring-color: #60a5fa; /* Blue focus ring */
+            border-color: transparent;
+        }
+        .placeholder-text::placeholder { /* Style for placeholder text */
+            color: #9ca3af;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-4 text-gray-200">
+
+    <!-- API Key Prompt Screen -->
+    <div id="api-key-prompt" class="container bg-gray-800 shadow-xl rounded-2xl p-8 w-full max-w-sm flex flex-col items-center space-y-6">
+        <h2 class="text-2xl font-bold text-gray-100">Enter Your Gemini API Key</h2>
+        <p class="text-center text-gray-400">Your API key is stored securely in your browser and is only used to power the AI features of this app.</p>
+        <div class="w-full">
+            <label for="api-key-input" class="block text-gray-300 font-semibold mb-1">API Key</label>
+            <input type="password" id="api-key-input" placeholder="Enter your Gemini API Key here" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+        </div>
+        <button id="save-api-key-btn" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
+            Save Key
+        </button>
+        <div id="key-message-box" class="mt-4 p-3 rounded-lg text-center hidden w-full"></div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="main-app-container" class="container bg-gray-800 shadow-xl rounded-2xl p-6 sm:p-8 w-full max-w-2xl hidden">
+        <!-- Data Entry Form -->
+        <div id="data-form" class="space-y-6">
+
+            <!-- AI Prompt Section -->
+            <div class="space-y-4">
+                <label for="ai-prompt" class="block text-gray-300 font-semibold mb-1">AI Prompt</label>
+                <textarea id="ai-prompt" placeholder="e.g. Give me 3 common kanji related to nature and at least two of their meanings each in English and Myanmar, with their kunyomi and onyomi" class="w-full h-24 px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200"></textarea>
+                <button id="ai-generate-btn" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95 flex items-center justify-center space-x-2">
+                    <span id="ai-button-text">Generate with AI</span>
+                    <div id="ai-loading" class="loading-spinner hidden"></div>
+                </button>
+            </div>
+            
+            <hr class="border-t border-gray-700">
+
+            <!-- Kunyomi & Onyomi Inputs -->
+            <div class="space-y-4 grid grid-cols-2 gap-4">
+                <div class="input-group">
+                    <label for="kunyomi" class="block text-gray-300 font-semibold mb-1">Kunyomi</label>
+                    <input type="text" id="kunyomi" placeholder="Enter kunyomi" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                </div>
+                <div class="input-group">
+                    <label for="onyomi" class="block text-gray-300 font-semibold mb-1">Onyomi</label>
+                    <input type="text" id="onyomi" placeholder="Enter onyomi" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                </div>
+            </div>
+
+            <hr class="border-t border-gray-700">
+
+            <!-- Dynamic Rows Section -->
+            <div id="dynamic-rows" class="space-y-4">
+                <!-- Initial Row -->
+                <div class="dynamic-row grid grid-cols-2 gap-4 input-group">
+                    <input type="text" placeholder="Kanji" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                    <input type="text" placeholder="Hiragana" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                    <input type="text" placeholder="English" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                    <input type="text" placeholder="Myanmar" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                </div>
+            </div>
+
+            <!-- Add Row Button -->
+            <div class="flex justify-center">
+                <button id="add-row-btn" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
+                    Add Row
+                </button>
+            </div>
+
+            <!-- Generate Button -->
+            <div class="flex justify-center mt-6">
+                <button id="generate-btn" class="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
+                    Generate Format
+                </button>
+            </div>
+        </div>
+
+        <hr class="border-t border-gray-700 mt-8 mb-6">
+
+        <!-- Output and Copy Section -->
+        <div>
+            <h2 class="text-xl font-bold text-gray-100 mb-3">Formatted Output</h2>
+            <div class="relative">
+                <textarea id="output-area" readonly class="w-full h-40 bg-gray-700 border border-gray-600 rounded-xl p-4 font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"></textarea>
+                <button id="copy-btn" class="absolute top-4 right-4 bg-gray-600 hover:bg-gray-500 text-gray-200 font-semibold py-1 px-3 rounded-lg text-sm transition-transform duration-200 active:scale-95">
+                    Copy
+                </button>
+            </div>
+            <!-- Message box for user feedback -->
+            <div id="message-box" class="mt-4 p-3 rounded-lg text-center hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        // DOM element references for the main app
+        const mainAppContainer = document.getElementById('main-app-container');
+        const kunyomiInput = document.getElementById('kunyomi');
+        const onyomiInput = document.getElementById('onyomi');
+        const dynamicRowsContainer = document.getElementById('dynamic-rows');
+        const addRowBtn = document.getElementById('add-row-btn');
+        const generateBtn = document.getElementById('generate-btn');
+        const outputArea = document.getElementById('output-area');
+        const copyBtn = document.getElementById('copy-btn');
+        const messageBox = document.getElementById('message-box');
+        const aiPromptInput = document.getElementById('ai-prompt');
+        const aiGenerateBtn = document.getElementById('ai-generate-btn');
+        const aiButtonText = document.getElementById('ai-button-text');
+        const aiLoadingSpinner = document.getElementById('ai-loading');
+        
+        // DOM element references for the API key prompt
+        const apiKeyPrompt = document.getElementById('api-key-prompt');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const saveApiKeyBtn = document.getElementById('save-api-key-btn');
+        const keyMessageBox = document.getElementById('key-message-box');
+
+        // Function to show a message to the user
+        function showMessage(text, type = 'info', messageBoxElement = messageBox) {
+            messageBoxElement.textContent = text;
+            messageBoxElement.style.display = 'block';
+            if (type === 'success') {
+                messageBoxElement.className = 'mt-4 p-3 rounded-lg text-center bg-green-800 text-green-200 w-full';
+            } else if (type === 'error') {
+                messageBoxElement.className = 'mt-4 p-3 rounded-lg text-center bg-red-800 text-red-200 w-full';
+            } else { // info
+                messageBoxElement.className = 'mt-4 p-3 rounded-lg text-center bg-blue-800 text-blue-200 w-full';
+            }
+            setTimeout(() => {
+                messageBoxElement.style.display = 'none';
+            }, 3000);
+        }
+
+        // Function to check for and display the main app or the API key prompt
+        function checkAndShowApp() {
+            const storedApiKey = localStorage.getItem('geminiApiKey');
+            if (storedApiKey) {
+                apiKeyPrompt.classList.add('hidden');
+                mainAppContainer.classList.remove('hidden');
+            } else {
+                apiKeyPrompt.classList.remove('hidden');
+                mainAppContainer.classList.add('hidden');
+            }
+        }
+
+        // Event listener for the "Save API Key" button
+        saveApiKeyBtn.addEventListener('click', () => {
+            const apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('geminiApiKey', apiKey);
+                showMessage('API key saved successfully!', 'success', keyMessageBox);
+                setTimeout(checkAndShowApp, 1000);
+            } else {
+                showMessage('Please enter a valid API key.', 'error', keyMessageBox);
+            }
+        });
+
+        // Function to create and append a new row of input fields
+        function createRow() {
+            const newRow = document.createElement('div');
+            newRow.className = 'dynamic-row grid grid-cols-2 gap-4 input-group';
+            newRow.innerHTML = `
+                <input type="text" placeholder="Kanji" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                <input type="text" placeholder="Hiragana" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                <input type="text" placeholder="English" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                <input type="text" placeholder="Myanmar" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+            `;
+            dynamicRowsContainer.appendChild(newRow);
+        }
+
+        // Function to handle the AI generation
+        async function generateWithAI() {
+            const prompt = aiPromptInput.value;
+            if (!prompt) {
+                showMessage("Please enter a prompt to generate data.", 'error');
+                return;
+            }
+
+            // Show loading state
+            aiButtonText.textContent = "Generating...";
+            aiLoadingSpinner.classList.remove('hidden');
+            aiGenerateBtn.disabled = true;
+
+            const structuredPrompt = {
+                contents: [{
+                    parts: [{
+                        text: `Generate an array of JSON objects based on the user's request. Each object should have 'kunyomi', 'onyomi' and an array of 'entries'. Each 'entry' object should have 'kanji', 'hiragana', 'english', and 'myanmar' properties. If a single kanji has multiple meanings, please provide a separate 'entry' object for each meaning. The user's request is: ${prompt}`
+                    }]
+                }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                "kunyomi": { "type": "STRING" },
+                                "onyomi": { "type": "STRING" },
+                                "entries": {
+                                    "type": "ARRAY",
+                                    "items": {
+                                        "type": "OBJECT",
+                                        "properties": {
+                                            "kanji": { "type": "STRING" },
+                                            "hiragana": { "type": "STRING" },
+                                            "english": { "type": "STRING" },
+                                            "myanmar": { "type": "STRING" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            const apiKey = localStorage.getItem('geminiApiKey');
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(structuredPrompt)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API call failed with status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                const json = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (json) {
+                    const data = JSON.parse(json);
+                    
+                    if (data && data.length > 0) {
+                        const firstEntry = data[0];
+                        
+                        // Clear existing fields
+                        kunyomiInput.value = firstEntry.kunyomi || '';
+                        onyomiInput.value = firstEntry.onyomi || '';
+                        dynamicRowsContainer.innerHTML = '';
+                        
+                        // Populate with new data
+                        firstEntry.entries.forEach(entry => {
+                            const newRow = document.createElement('div');
+                            newRow.className = 'dynamic-row grid grid-cols-2 gap-4 input-group';
+                            newRow.innerHTML = `
+                                <input type="text" placeholder="Kanji" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200" value="${entry.kanji || ''}">
+                                <input type="text" placeholder="Hiragana" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200" value="${entry.hiragana || ''}">
+                                <input type="text" placeholder="English" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200" value="${entry.english || ''}">
+                                <input type="text" placeholder="Myanmar" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200" value="${entry.myanmar || ''}">
+                            `;
+                            dynamicRowsContainer.appendChild(newRow);
+                        });
+                        
+                        showMessage('Data generated successfully!', 'success');
+                    }
+                } else {
+                    showMessage('Failed to generate data from the prompt.', 'error');
+                }
+            } catch (error) {
+                console.error('Error generating AI data:', error);
+                showMessage('An error occurred. Please check your API key and try a different prompt.', 'error');
+            } finally {
+                // Reset loading state
+                aiButtonText.textContent = "Generate with AI";
+                aiLoadingSpinner.classList.add('hidden');
+                aiGenerateBtn.disabled = false;
+            }
+        }
+
+        // Event listener for the AI Generate button
+        aiGenerateBtn.addEventListener('click', generateWithAI);
+        
+        // Event listener for the "Add Row" button
+        addRowBtn.addEventListener('click', () => {
+            createRow();
+        });
+
+        // Event listener for the "Generate Format" button
+        generateBtn.addEventListener('click', () => {
+            // Get base data
+            const kunyomi = kunyomiInput.value;
+            const onyomi = onyomiInput.value;
+
+            // Start building the output string
+            let output = `kunyomi -> ${kunyomi}\nonyomi -> ${onyomi}\n\n`;
+
+            // Get all dynamic rows
+            const dynamicRows = document.querySelectorAll('.dynamic-row');
+            const filledRows = [];
+
+            // Collect data from rows that are not empty
+            dynamicRows.forEach(row => {
+                const inputs = row.querySelectorAll('input[type="text"]');
+                const text3 = inputs[0].value;
+                const text4 = inputs[1].value;
+                const text5 = inputs[2].value;
+                const text6 = inputs[3].value;
+
+                if (text3 || text4 || text5 || text6) {
+                    filledRows.push(`${text3} -> ${text4} -> ${text5} (${text6})`);
+                }
+            });
+
+            // Join the filled rows with a line break
+            output += filledRows.join('\n');
+
+            // Update the output area
+            outputArea.value = output;
+        });
+
+        // Event listener for the "Copy to Clipboard" button
+        copyBtn.addEventListener('click', () => {
+            if (outputArea.value.trim() === '') {
+                showMessage('Nothing to copy!', 'error');
+                return;
+            }
+            // Select the text in the textarea
+            outputArea.select();
+            
+            try {
+                // Use the deprecated but functional method for clipboard copying
+                document.execCommand('copy');
+                showMessage('Copied to clipboard!', 'success');
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                showMessage('Failed to copy. Please try again.', 'error');
+            }
+            // Deselect the text
+            window.getSelection().removeAllRanges();
+        });
+        
+        // Initial check when the page loads
+        checkAndShowApp();
+
+    </script>
+</body>
+</html>
