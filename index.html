@@ -1,388 +1,356 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="my">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kanji Data Entry</title>
-    <!-- Tailwind CSS CDN -->
+    <title>ကားပါကင်စီမံခန့်ခွဲမှုစနစ်</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* Dark background */
+            font-family: 'Inter', 'Padauk', sans-serif;
         }
-        .container {
-            transition: all 0.3s ease-in-out;
-            background-color: #1f2937; /* Darker container background */
-            color: #d1d5db; /* Light text color */
+        .modal-backdrop {
+            transition: opacity 0.3s ease-in-out;
         }
-        .input-group {
-            transition: all 0.3s ease-in-out;
-        }
-        input, textarea {
-            background-color: #374151; /* Even darker input background */
-            border-color: #4b5563; /* Darker border */
-            color: #f9fafb; /* Lighter text in inputs */
-        }
-        input:focus, textarea:focus {
-            ring-color: #60a5fa; /* Blue focus ring */
-            border-color: transparent;
-        }
-        .placeholder-text::placeholder { /* Style for placeholder text */
-            color: #9ca3af;
-        }
-        .loading-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #fff;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        .modal-content {
+            transition: transform 0.3s ease-in-out;
         }
     </style>
 </head>
-<body class="bg-gray-900 flex items-center justify-center min-h-screen p-4 text-gray-200">
+<body class="bg-gray-100 text-gray-800">
 
-    <!-- API Key Prompt Screen -->
-    <div id="api-key-prompt" class="container bg-gray-800 shadow-xl rounded-2xl p-8 w-full max-w-sm flex flex-col items-center space-y-6">
-        <h2 class="text-2xl font-bold text-gray-100">Enter Your Gemini API Key</h2>
-        <p class="text-center text-gray-400">Your API key is stored securely in your browser and is only used to power the AI features of this app.</p>
-        <div class="w-full">
-            <label for="api-key-input" class="block text-gray-300 font-semibold mb-1">API Key</label>
-            <input type="password" id="api-key-input" placeholder="Enter your Gemini API Key here" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">ကားပါကင်မှတ်တမ်းစနစ်</h1>
+            <p class="text-gray-600 mt-2">လက်ရှိနှင့် ယခင်ကားပါကင်မှတ်တမ်းများကို စီမံပါ။</p>
+        </header>
+
+        <main>
+            <!-- Input Form Card -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">ကားအသစ်ဝင်ရန်</h2>
+                <div class="flex flex-col sm:flex-row gap-4 items-end">
+                    <div class="w-full sm:flex-grow">
+                        <label for="carNumber" class="block text-sm font-medium text-gray-700 mb-1">ကားနံပါတ်</label>
+                        <input type="text" id="carNumber" placeholder="ဥပမာ ABC-1234" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out">
+                    </div>
+                    <div class="w-full sm:w-auto">
+                        <button id="addCarBtn" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out shadow-sm">
+                            ကားထည့်ရန်
+                        </button>
+                    </div>
+                </div>
+                <p id="error-message" class="text-red-500 text-sm mt-2 h-4"></p>
+            </div>
+
+            <!-- Currently Parked Section -->
+            <div class="mb-10">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">လက်ရှိပါကင်ထိုးထားသောကားများ</h2>
+                <div class="mb-4">
+                     <label for="searchInput" class="sr-only">ကားရှာရန်</label>
+                     <input type="text" id="searchInput" placeholder="🔍 ကားနံပါတ်ဖြင့်ရှာရန်..." class="w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div id="currentlyParkedList" class="space-y-4">
+                    <!-- Active cars will be dynamically added here -->
+                </div>
+                <div id="no-parked-cars-message" class="text-center py-10 hidden">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">လက်ရှိပါကင်ထိုးထားသောကားမရှိပါ</h3>
+                    <p class="mt-1 text-sm text-gray-500">အပေါ်ကဖောင်ကိုသုံးပြီး ကားအသစ်ထည့်ပါ။</p>
+                </div>
+            </div>
+
+            <!-- Parking History Section -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">ပါကင်မှတ်တမ်း</h2>
+                <div id="parkingHistoryList" class="space-y-4">
+                    <!-- Past records will be dynamically added here -->
+                </div>
+                 <div id="no-history-message" class="text-center py-10 hidden">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">ပါကင်မှတ်တမ်းမရှိပါ</h3>
+                    <p class="mt-1 text-sm text-gray-500">ထွက်သွားသောကားများဤနေရာတွင်ပေါ်လာပါမည်။</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden modal-backdrop opacity-0">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md modal-content transform scale-95">
+            <h2 class="text-2xl font-bold mb-4 text-gray-900">ထွက်ခွာမှုအတည်ပြုရန်</h2>
+            <div class="space-y-3">
+                <p class="text-lg"><span class="font-semibold text-gray-700">ကားနံပါတ်:</span> <span id="modalCarNumber" class="font-bold"></span></p>
+                <p class="text-lg"><span class="font-semibold text-gray-700">ပါကင်ထိုးသည့်ကြာချိန်:</span> <span id="modalTimeParked"></span></p>
+                <p class="text-2xl font-bold"><span class="font-semibold text-gray-700">တွက်ချက်ထားသောကျသင့်ငွေ:</span> <span id="modalTotalFee" class="text-indigo-600"></span></p>
+                <p class="text-xs text-gray-500">ပါကင်နှုန်း - တစ်နာရီလျှင် ၂၀ ဘတ် (အနီးစပ်ဆုံး)။</p>
+            </div>
+            <div class="mt-6">
+                <label for="manualAmount" class="block text-sm font-medium text-gray-700">ကိုယ်တိုင်ငွေပေးချေမှုပမာဏ (ထည့်ချင်မှထည့်ပါ)</label>
+                <input type="number" id="manualAmount" placeholder="ကျသင့်ငွေကို ပြောင်းလဲလိုပါက ပမာဏထည့်ပါ" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" min="0">
+            </div>
+            <div class="mt-8 flex justify-end gap-4">
+                <button id="cancelBtn" class="bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition">ပယ်ဖျက်မည်</button>
+                <button id="confirmPayBtn" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 transition">ငွေပေးချေမှုအတည်ပြုပါ</button>
+            </div>
         </div>
-        <button id="save-api-key-btn" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
-            Save Key
-        </button>
-        <div id="key-message-box" class="mt-4 p-3 rounded-lg text-center hidden w-full"></div>
     </div>
 
-    <!-- Main App Container -->
-    <div id="main-app-container" class="container bg-gray-800 shadow-xl rounded-2xl p-6 sm:p-8 w-full max-w-2xl hidden">
-        <!-- Data Entry Form -->
-        <div id="data-form" class="space-y-6">
-
-            <!-- AI Prompt Section -->
-            <div class="space-y-4">
-                <label for="ai-prompt" class="block text-gray-300 font-semibold mb-1">AI Prompt</label>
-                <textarea id="ai-prompt" placeholder="e.g. Give me 3 common kanji related to nature and at least two of their meanings each in English and Myanmar, with their kunyomi and onyomi" class="w-full h-24 px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200"></textarea>
-                <button id="ai-generate-btn" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95 flex items-center justify-center space-x-2">
-                    <span id="ai-button-text">Generate with AI</span>
-                    <div id="ai-loading" class="loading-spinner hidden"></div>
-                </button>
-            </div>
-            
-            <hr class="border-t border-gray-700">
-
-            <!-- Kunyomi & Onyomi Inputs -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="input-group">
-                    <label for="kunyomi" class="block text-gray-300 font-semibold mb-1">Kunyomi</label>
-                    <input type="text" id="kunyomi" placeholder="Enter kunyomi" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                </div>
-                <div class="input-group">
-                    <label for="onyomi" class="block text-gray-300 font-semibold mb-1">Onyomi</label>
-                    <input type="text" id="onyomi" placeholder="Enter onyomi" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                </div>
-            </div>
-
-            <hr class="border-t border-gray-700">
-            
-            <div class="flex justify-between items-center mb-4">
-                <label class="block text-gray-300 font-semibold">Kanji Entries (separated by ';')</label>
-                <button id="add-row-btn" class="bg-blue-600 text-white font-semibold py-1 px-4 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
-                    Add Row
-                </button>
-            </div>
-            <!-- Dynamic Rows Section -->
-            <div id="dynamic-rows" class="space-y-4">
-                <!-- Initial Row -->
-                <div class="dynamic-row flex items-center space-x-2 input-group">
-                    <input type="text" placeholder="Kanji ; Hiragana ; English ; Myanmar" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                    <button class="remove-row-btn bg-red-600 text-white p-2 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Generate Button -->
-            <div class="flex justify-center mt-6">
-                <button id="generate-btn" class="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
-                    Generate Format
-                </button>
-            </div>
-        </div>
-
-        <hr class="border-t border-gray-700 mt-8 mb-6">
-
-        <!-- Output and Copy Section -->
-        <div>
-            <h2 class="text-xl font-bold text-gray-100 mb-3">Formatted Output</h2>
-            <div class="relative">
-                <textarea id="output-area" readonly class="w-full h-40 bg-gray-700 border border-gray-600 rounded-xl p-4 font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"></textarea>
-                <button id="copy-btn" class="absolute top-4 right-4 bg-gray-600 hover:bg-gray-500 text-gray-200 font-semibold py-1 px-3 rounded-lg text-sm transition-transform duration-200 active:scale-95">
-                    Copy
-                </button>
-            </div>
-            <!-- Message box for user feedback -->
-            <div id="message-box" class="mt-4 p-3 rounded-lg text-center hidden"></div>
-        </div>
-    </div>
 
     <script>
-        // DOM element references for the main app
-        const mainAppContainer = document.getElementById('main-app-container');
-        const kunyomiInput = document.getElementById('kunyomi');
-        const onyomiInput = document.getElementById('onyomi');
-        const dynamicRowsContainer = document.getElementById('dynamic-rows');
-        const addRowBtn = document.getElementById('add-row-btn');
-        const generateBtn = document.getElementById('generate-btn');
-        const outputArea = document.getElementById('output-area');
-        const copyBtn = document.getElementById('copy-btn');
-        const messageBox = document.getElementById('message-box');
-        const aiPromptInput = document.getElementById('ai-prompt');
-        const aiGenerateBtn = document.getElementById('ai-generate-btn');
-        const aiButtonText = document.getElementById('ai-button-text');
-        const aiLoadingSpinner = document.getElementById('ai-loading');
-        
-        // DOM element references for the API key prompt
-        const apiKeyPrompt = document.getElementById('api-key-prompt');
-        const apiKeyInput = document.getElementById('api-key-input');
-        const saveApiKeyBtn = document.getElementById('save-api-key-btn');
-        const keyMessageBox = document.getElementById('key-message-box');
+        document.addEventListener('DOMContentLoaded', () => {
+            const carNumberInput = document.getElementById('carNumber');
+            const addCarBtn = document.getElementById('addCarBtn');
+            const searchInput = document.getElementById('searchInput');
+            const currentlyParkedList = document.getElementById('currentlyParkedList');
+            const parkingHistoryList = document.getElementById('parkingHistoryList');
+            const errorMessage = document.getElementById('error-message');
+            const noParkedMessage = document.getElementById('no-parked-cars-message');
+            const noHistoryMessage = document.getElementById('no-history-message');
 
-        // Function to show a message to the user
-        function showMessage(text, type = 'info', messageBoxElement = messageBox) {
-            messageBoxElement.textContent = text;
-            messageBoxElement.style.display = 'block';
-            if (type === 'success') {
-                messageBoxElement.className = 'mt-4 p-3 rounded-lg text-center bg-green-800 text-green-200 w-full';
-            } else if (type === 'error') {
-                messageBoxElement.className = 'mt-4 p-3 rounded-lg text-center bg-red-800 text-red-200 w-full';
-            } else { // info
-                messageBoxElement.className = 'mt-4 p-3 rounded-lg text-center bg-blue-800 text-blue-200 w-full';
-            }
-            setTimeout(() => {
-                messageBoxElement.style.display = 'none';
-            }, 3000);
-        }
+            const paymentModal = document.getElementById('paymentModal');
+            const modalContent = paymentModal.querySelector('.modal-content');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const confirmPayBtn = document.getElementById('confirmPayBtn');
 
-        // Function to check for and display the main app or the API key prompt
-        function checkAndShowApp() {
-            const storedApiKey = localStorage.getItem('geminiApiKey');
-            if (storedApiKey) {
-                apiKeyPrompt.classList.add('hidden');
-                mainAppContainer.classList.remove('hidden');
-            } else {
-                apiKeyPrompt.classList.remove('hidden');
-                mainAppContainer.classList.add('hidden');
-            }
-        }
+            const PARKING_RATE_PER_HOUR = 20; // 20 Baht per hour
+            const CURRENCY_SYMBOL = 'ဘတ်';
+            let allCars = [];
+            let carToCheckOut = null;
 
-        // Event listener for the "Save API Key" button
-        saveApiKeyBtn.addEventListener('click', () => {
-            const apiKey = apiKeyInput.value.trim();
-            if (apiKey) {
-                localStorage.setItem('geminiApiKey', apiKey);
-                showMessage('API key saved successfully!', 'success', keyMessageBox);
-                setTimeout(checkAndShowApp, 1000);
-            } else {
-                showMessage('Please enter a valid API key.', 'error', keyMessageBox);
-            }
-        });
-
-        // Function to create and append a new row of input fields
-        function createRow(value = '') {
-            const newRow = document.createElement('div');
-            newRow.className = 'dynamic-row flex items-center space-x-2 input-group';
-            newRow.innerHTML = `
-                <input type="text" placeholder="Kanji ; Hiragana ; English ; Myanmar" class="w-full px-4 py-2 border rounded-xl focus:ring-2 placeholder-text focus:ring-blue-500 focus:border-transparent transition-all duration-200" value="${value}">
-                <button class="remove-row-btn bg-red-600 text-white p-2 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-transform duration-200 active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
-                    </svg>
-                </button>
-            `;
-            dynamicRowsContainer.appendChild(newRow);
-
-            // Add event listener to the new remove button
-            newRow.querySelector('.remove-row-btn').addEventListener('click', (event) => {
-                event.currentTarget.parentNode.remove();
-            });
-        }
-
-        // Function to handle the AI generation
-        async function generateWithAI() {
-            const prompt = aiPromptInput.value;
-            if (!prompt) {
-                showMessage("Please enter a prompt to generate data.", 'error');
-                return;
+            // --- DATA & STORAGE ---
+            function loadFromStorage() {
+                const storedCars = localStorage.getItem('parkingRecords');
+                allCars = storedCars ? JSON.parse(storedCars) : [];
+                renderLists();
             }
 
-            // Show loading state
-            aiButtonText.textContent = "Generating...";
-            aiLoadingSpinner.classList.remove('hidden');
-            aiGenerateBtn.disabled = true;
+            function saveToStorage() {
+                localStorage.setItem('parkingRecords', JSON.stringify(allCars));
+            }
 
-            const structuredPrompt = {
-                contents: [{
-                    parts: [{
-                        text: `Generate an array of JSON objects based on the user's request. Each object should have 'kunyomi', 'onyomi' and an array of 'entries'. Each 'entry' object should have 'kanji', 'hiragana', 'english', and 'myanmar' properties. If a single kanji has multiple meanings, please provide a separate 'entry' object for each meaning. The user's request is: ${prompt}`
-                    }]
-                }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: {
-                                "kunyomi": { "type": "STRING" },
-                                "onyomi": { "type": "STRING" },
-                                "entries": {
-                                    "type": "ARRAY",
-                                    "items": {
-                                        "type": "OBJECT",
-                                        "properties": {
-                                            "kanji": { "type": "STRING" },
-                                            "hiragana": { "type": "STRING" },
-                                            "english": { "type": "STRING" },
-                                            "myanmar": { "type": "STRING" }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
+            // --- RENDERING & UI ---
+            function formatElapsedTime(entryTime) {
+                const now = new Date();
+                const entry = new Date(entryTime);
+                let seconds = Math.floor((now - entry) / 1000);
+                
+                const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+                return `${h}:${m}:${s}`;
+            }
             
-            const apiKey = localStorage.getItem('geminiApiKey');
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+             function formatTotalDuration(entryTime, exitTime) {
+                const entry = new Date(entryTime);
+                const exit = new Date(exitTime);
+                let seconds = Math.floor((exit - entry) / 1000);
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(structuredPrompt)
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                
+                let duration = '';
+                if (h > 0) duration += `${h} နာရီ `;
+                if (m > 0) duration += `${m} မိနစ်`;
+                if (h === 0 && m === 0) duration = '< ၁ မိနစ်';
+                
+                return duration.trim();
+            }
+
+            function renderLists() {
+                currentlyParkedList.innerHTML = '';
+                parkingHistoryList.innerHTML = '';
+                
+                const searchTerm = searchInput.value.trim().toUpperCase();
+
+                const parkedCars = allCars.filter(c => c.status === 'parked');
+                const historyCars = allCars.filter(c => c.status === 'paid').sort((a,b) => new Date(b.exitTime) - new Date(a.exitTime));
+
+                // Render currently parked
+                const filteredParkedCars = parkedCars.filter(c => c.number.includes(searchTerm));
+                
+                noParkedMessage.style.display = filteredParkedCars.length === 0 ? 'block' : 'none';
+                
+                filteredParkedCars.forEach(car => {
+                    const carCard = document.createElement('div');
+                    carCard.className = 'bg-white p-5 rounded-xl shadow-md border-l-4 border-blue-500';
+                    const entryTime = new Date(car.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    carCard.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <p class="text-xl font-bold text-gray-800">${car.number}</p>
+                                <p class="text-sm text-gray-500">ဝင်ရောက်သည့်အချိန်: ${entryTime}</p>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <div class="text-center">
+                                    <p class="text-lg font-semibold text-gray-800" data-entry-time="${car.entryTime}">
+                                        ${formatElapsedTime(car.entryTime)}
+                                    </p>
+                                    <p class="text-xs text-gray-500">ကြာမြင့်ချိန်</p>
+                                </div>
+                                <button class="checkout-btn bg-green-100 text-green-700 hover:bg-green-200 font-semibold py-2 px-4 rounded-lg transition" data-id="${car.id}">
+                                    ငွေပေးချေပြီးထွက်ခွာရန်
+                                </button>
+                            </div>
+                        </div>`;
+                    currentlyParkedList.appendChild(carCard);
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`API call failed with status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                const json = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                // Render history
+                noHistoryMessage.style.display = historyCars.length === 0 ? 'block' : 'none';
                 
-                if (json) {
-                    const data = JSON.parse(json);
-                    
-                    if (data && data.length > 0) {
-                        const firstEntry = data[0];
-                        
-                        // Clear existing fields
-                        kunyomiInput.value = firstEntry.kunyomi || '';
-                        onyomiInput.value = firstEntry.onyomi || '';
-                        dynamicRowsContainer.innerHTML = '';
-                        
-                        // Populate with new data
-                        firstEntry.entries.forEach(entry => {
-                            const formattedString = `${entry.kanji || ''} ; ${entry.hiragana || ''} ; ${entry.english || ''} ; ${entry.myanmar || ''}`;
-                            createRow(formattedString);
-                        });
-                        
-                        showMessage('Data generated successfully!', 'success');
-                    }
-                } else {
-                    showMessage('Failed to generate data from the prompt.', 'error');
-                }
-            } catch (error) {
-                console.error('Error generating AI data:', error);
-                showMessage('An error occurred. Please check your API key and try a different prompt.', 'error');
-            } finally {
-                // Reset loading state
-                aiButtonText.textContent = "Generate with AI";
-                aiLoadingSpinner.classList.add('hidden');
-                aiGenerateBtn.disabled = false;
+                historyCars.forEach(car => {
+                    const carCard = document.createElement('div');
+                    carCard.className = 'bg-white p-5 rounded-xl shadow-md border-l-4 border-gray-400 opacity-90';
+                    const entryTime = new Date(car.entryTime).toLocaleString();
+                    const exitTime = new Date(car.exitTime).toLocaleString();
+                    const feeText = `${car.fee.toFixed(2)} ${CURRENCY_SYMBOL} ${car.manualPayment ? '<span class="text-xs text-gray-500 font-normal">(ကိုယ်တိုင်)</span>' : ''}`;
+                    carCard.innerHTML = `
+                         <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <p class="text-xl font-bold text-gray-600">${car.number}</p>
+                                <p class="text-sm text-gray-500">ဝင်: ${entryTime} | ထွက်: ${exitTime}</p>
+                            </div>
+                            <div class="text-right">
+                                 <p class="text-lg font-semibold text-gray-800">${feeText}</p>
+                                 <p class="text-sm text-gray-500">ကြာချိန်: ${formatTotalDuration(car.entryTime, car.exitTime)}</p>
+                            </div>
+                        </div>`;
+                    parkingHistoryList.appendChild(carCard);
+                });
             }
-        }
+            
+            setInterval(() => {
+                document.querySelectorAll('[data-entry-time]').forEach(el => {
+                    el.textContent = formatElapsedTime(el.dataset.entryTime);
+                });
+            }, 1000);
 
-        // Event listener for the AI Generate button
-        aiGenerateBtn.addEventListener('click', generateWithAI);
-        
-        // Event listener for the "Add Row" button
-        addRowBtn.addEventListener('click', () => {
-            createRow();
-        });
+            // --- CORE LOGIC ---
+            function addCar() {
+                const carNumber = carNumberInput.value.trim().toUpperCase();
+                if (!carNumber) {
+                    errorMessage.textContent = 'ကျေးဇူးပြု၍ ကားနံပါတ်ထည့်ပါ။';
+                    return;
+                }
+                if (allCars.some(c => c.number === carNumber && c.status === 'parked')) {
+                    errorMessage.textContent = 'ဤကားသည် ပါကင်ထဲတွင်ရှိနေပြီးသားဖြစ်သည်။';
+                    return;
+                }
+                errorMessage.textContent = '';
 
-        // Event listener for the "Generate Format" button
-        generateBtn.addEventListener('click', () => {
-            // Get base data
-            const kunyomi = kunyomiInput.value;
-            const onyomi = onyomiInput.value;
+                const newCar = {
+                    id: Date.now(),
+                    number: carNumber,
+                    entryTime: new Date().toISOString(),
+                    status: 'parked',
+                    exitTime: null,
+                    fee: null,
+                    manualPayment: false
+                };
+                allCars.push(newCar);
+                saveToStorage();
+                renderLists();
+                carNumberInput.value = '';
+                carNumberInput.focus();
+            }
+            
+            function calculateFee(entryTime) {
+                const now = new Date();
+                const entry = new Date(entryTime);
+                const minutesParked = (now - entry) / (1000 * 60);
+                
+                if (minutesParked <= 0) return PARKING_RATE_PER_HOUR;
 
-            // Start building the output string
-            let output = `kunyomi -> ${kunyomi}\nonyomi -> ${onyomi}\n\n`;
+                const hoursToCharge = Math.ceil(minutesParked / 60);
+                const fee = hoursToCharge * PARKING_RATE_PER_HOUR;
+                return fee;
+            }
 
-            // Get all dynamic rows
-            const dynamicRows = document.querySelectorAll('.dynamic-row');
-            const filledRows = [];
+            // --- MODAL HANDLING ---
+            function openPaymentModal(carId) {
+                carToCheckOut = allCars.find(c => c.id === carId);
+                if (!carToCheckOut) return;
+                
+                const fee = calculateFee(carToCheckOut.entryTime);
+                
+                document.getElementById('modalCarNumber').textContent = carToCheckOut.number;
+                document.getElementById('modalTimeParked').textContent = formatElapsedTime(carToCheckOut.entryTime);
+                document.getElementById('modalTotalFee').textContent = `${fee.toFixed(2)} ${CURRENCY_SYMBOL}`;
+                document.getElementById('manualAmount').value = '';
+                
+                paymentModal.classList.remove('hidden');
+                setTimeout(() => {
+                    paymentModal.classList.remove('opacity-0');
+                    modalContent.classList.remove('scale-95');
+                }, 10);
+            }
+            
+            function closePaymentModal() {
+                 paymentModal.classList.add('opacity-0');
+                 modalContent.classList.add('scale-95');
+                 setTimeout(() => {
+                    paymentModal.classList.add('hidden');
+                    carToCheckOut = null;
+                }, 300);
+            }
 
-            // Collect data from rows that are not empty
-            dynamicRows.forEach(row => {
-                const input = row.querySelector('input[type="text"]');
-                const parts = input.value.split(';').map(part => part.trim());
+            function confirmPayment() {
+                if (!carToCheckOut) return;
 
-                if (parts.some(p => p !== '')) {
-                    const kanji = parts[0] || '';
-                    const hiragana = parts[1] || '';
-                    const english = parts[2] || '';
-                    const myanmar = parts[3] || '';
-                    
-                    filledRows.push(`${kanji} -> ${hiragana} -> ${english} (${myanmar})`);
+                const manualAmountInput = document.getElementById('manualAmount');
+                const manualAmount = parseFloat(manualAmountInput.value);
+                
+                let finalFee;
+                let isManual = false;
+
+                if (!isNaN(manualAmount) && manualAmount >= 0 && manualAmountInput.value.trim() !== '') {
+                    finalFee = manualAmount;
+                    isManual = true;
+                } else {
+                    finalFee = calculateFee(carToCheckOut.entryTime);
+                }
+
+                carToCheckOut.status = 'paid';
+                carToCheckOut.exitTime = new Date().toISOString();
+                carToCheckOut.fee = finalFee;
+                carToCheckOut.manualPayment = isManual;
+
+                saveToStorage();
+                renderLists();
+                closePaymentModal();
+            }
+
+            // --- EVENT LISTENERS ---
+            addCarBtn.addEventListener('click', addCar);
+            carNumberInput.addEventListener('keypress', e => {
+                if (e.key === 'Enter') addCar();
+            });
+            searchInput.addEventListener('input', renderLists);
+            
+            currentlyParkedList.addEventListener('click', e => {
+                const checkoutBtn = e.target.closest('.checkout-btn');
+                if (checkoutBtn) {
+                    const carId = parseInt(checkoutBtn.dataset.id, 10);
+                    openPaymentModal(carId);
                 }
             });
 
-            // Join the filled rows with a line break
-            output += filledRows.join('\n');
+            confirmPayBtn.addEventListener('click', confirmPayment);
+            cancelBtn.addEventListener('click', closePaymentModal);
+            paymentModal.addEventListener('click', e => {
+                if (e.target === paymentModal) {
+                    closePaymentModal();
+                }
+            });
 
-            // Update the output area
-            outputArea.value = output;
+            // Initial Load
+            loadFromStorage();
         });
-
-        // Event listener for the "Copy to Clipboard" button
-        copyBtn.addEventListener('click', () => {
-            if (outputArea.value.trim() === '') {
-                showMessage('Nothing to copy!', 'error');
-                return;
-            }
-            // Select the text in the textarea
-            outputArea.select();
-            
-            try {
-                // Use the deprecated but functional method for clipboard copying
-                document.execCommand('copy');
-                showMessage('Copied to clipboard!', 'success');
-            } catch (err) {
-                console.error('Failed to copy text: ', err);
-                showMessage('Failed to copy. Please try again.', 'error');
-            }
-            // Deselect the text
-            window.getSelection().removeAllRanges();
-        });
-        
-        // Initial check when the page loads
-        checkAndShowApp();
-
     </script>
 </body>
 </html>
+
